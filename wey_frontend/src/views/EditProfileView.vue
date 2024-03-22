@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast'
 import { useUserStore} from '@/stores/user'
+import { toast } from 'vue3-toastify'
 
 export default {
   setup() {
@@ -37,15 +38,32 @@ export default {
       }
 
       if(this.errors.length === 0) {
+        let formData = new FormData()
+        formData.append('avatar', this.$refs.file.files[0])
+        formData.append('name', this.form.name)
+        formData.append('email', this.form.email)
+
         axios
-          .post('/api/editprofile/', this.form)
+          .post('/api/editprofile/', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          })
           .then(response => {
             if(response.data.message === 'profile updated') {
-              
-              this.toastStore.showToast(5000, 'The user was saved', 'bg-emerald-500')
+              toast.success(response.data.message)
+              this.userStore.setUserInfo({
+                id: this.userStore.user.id,
+                name: this.form.name,
+                email: this.form.email,
+                avatar: response.data.user.get_avatar
+              })
+
+              this.$router.back()
+              //this.toastStore.showToast(5000, 'The user was saved', 'bg-emerald-500')
             } else {
               console.log('Something went wrong');
-              this.toastStore.showToast(5000, 'Something went wrong', 'bg-red-500')
+              toast.error(response.data.message)
             }
           })
           .catch(error => {
@@ -80,6 +98,10 @@ export default {
           <div>
             <label>E-mail</label>
             <input type="email" v-model="form.email" placeholder="Your email address" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
+          </div>
+          <div>
+            <label for="avatar">Avatar</label>
+            <input id="avatar" type="file" ref="file">
           </div>
           
 

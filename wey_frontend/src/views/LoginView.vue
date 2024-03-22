@@ -39,13 +39,16 @@ export default {
           .post('/api/login/', this.form)
           .then(response => {
             this.store.setToken(response.data)
-            console.log(response.data);
             axios.defaults.headers.common['Authorization'] = "Bearer " + response.data.access
           })
           .catch(error => {
             console.log('error', error)
+
+            this.errors.push('The email or password are wrong')
           })
-        
+      }
+
+      if(this.errors.length === 0){
         await axios
           .get('/api/me/')
           .then(response => {
