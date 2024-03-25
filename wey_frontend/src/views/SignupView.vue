@@ -2,6 +2,7 @@
 import { RouterLink } from 'vue-router'
 import axios from 'axios'
 import { useToastStore } from '@/stores/toast';
+import { toast } from 'vue3-toastify';
 
 export default {
   setup() {
@@ -50,8 +51,7 @@ export default {
           .then(response => {
             console.log(response.data)
             if(response.data.message === 'success') {
-              console.log('The user is registered. Please log in')
-              this.toastStore.showToast(5000, 'The user is registered. Please log in', 'bg-emerald-500')
+              toast.success('The user is registered Please activate your account by clicking on the link sent to your email. Please log in')
               this.form.email = ''
               this.form.name = ''
               this.form.password1 = ''
@@ -62,7 +62,7 @@ export default {
               for (const key in data) {
                 this.errors.push(data[key][0].message)
               }
-              this.toastStore.showToast(5000, 'Something went wrong', 'bg-red-500')
+              toast.error('Something went wrong')
             }
           })
           .catch(error => {

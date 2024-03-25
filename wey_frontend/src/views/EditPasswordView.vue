@@ -19,8 +19,9 @@ export default {
     return {
       errors: [],
       form: {
-        email: this.userStore.user.email,
-        name: this.userStore.user.name,
+        old_password: '',
+        new_password1: '',
+        new_password2: '',
       }
     }
   },
@@ -29,41 +30,30 @@ export default {
     submitForm() {
       this.errors = []
 
-      if(this.form.email === '') {
-        this.errors.push('Your email is missing')
-      }
-
-      if(this.form.name === '') {
-        this.errors.push('Your name is missing')
+      if(this.form.password1 !== this.form.password2){
+        this.errors.push('The password does not match')
       }
 
       if(this.errors.length === 0) {
         let formData = new FormData()
-        formData.append('avatar', this.$refs.file.files[0])
-        formData.append('name', this.form.name)
-        formData.append('email', this.form.email)
+        formData.append('old_password', this.form.old_password)
+        formData.append('new_password1', this.form.new_password1)
+        formData.append('new_password2', this.form.new_password2)
 
         axios
-          .post('/api/editprofile/', formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            }
-          })
+          .post('/api/editpassword/', formData)
           .then(response => {
-            if(response.data.message === 'profile updated') {
+            if(response.data.message === 'success') {
               toast.success(response.data.message)
-              this.userStore.setUserInfo({
-                id: this.userStore.user.id,
-                name: this.form.name,
-                email: this.form.email,
-                avatar: response.data.user.get_avatar
-              })
-
-              this.$router.back()
+              
+              this.$router.push(`/profile/${this.userStore.user.id}`)
               //this.toastStore.showToast(5000, 'The user was saved', 'bg-emerald-500')
             } else {
-              console.log('Something went wrong');
-              toast.error(response.data.message)
+              const data = JSON.parse(response.data.message)
+
+              for (const key in data) {
+                this.errors.push(data[key][0].message)
+              }
             }
           })
           .catch(error => {
@@ -80,13 +70,11 @@ export default {
   <div class="max-w-7xl mx-auto grid grid-cols-2 gap-4">
     <div class="main-left">
       <div class="p-12 bg-white border border-gray-200 rounded-lg">
-        <h1 class="mb-6 text-2xl">Edit profile</h1>
+        <h1 class="mb-6 text-2xl">Edit Password</h1>
 
         <p class="font-bold">
-          Altere os detalhes da sua conta
+          Here You can change your password
         </p>
-
-        <RouterLink to="/profile/edit/password" class="underline">Edit Password</RouterLink>
       </div>
     </div>
 
@@ -94,19 +82,20 @@ export default {
       <div class="p-12 bg-white border border-gray-200 rounded-lg">
         <form class="space-y-6" v-on:submit.prevent="submitForm">
           <div>
-            <label>Name</label>
-            <input type="text" v-model="form.name" placeholder="Your full name" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
+            <label>Old password</label>
+            <input type="text" v-model="form.old_password" placeholder="Your old password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
           </div>
+
           <div>
-            <label>E-mail</label>
-            <input type="email" v-model="form.email" placeholder="Your email address" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
+            <label>New password</label>
+            <input type="text" v-model="form.new_password1" placeholder="Your new Password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
           </div>
+
           <div>
-            <label for="avatar">Avatar</label>
-            <input id="avatar" type="file" ref="file">
+            <label>Repeat Password</label>
+            <input type="text" v-model="form.new_password2" placeholder="Repeat password" class="w-full mt-2 py-4 px-6 border border-gray-200 rounded-lg">
           </div>
           
-
           <template v-if="errors.length > 0">
             <div class="bg-red-300 text-white rounded-lg p-6">
               <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
