@@ -34,7 +34,8 @@ export default {
       user: {
         id: null
       },
-      body: ''
+      body: '',
+      url: null,
     }
   },
 
@@ -53,6 +54,11 @@ export default {
   },
 
   methods: {
+    onFileChange(e){
+      const file = e.target.files[0]
+      this.url = URL.createObjectURL(file);
+    },
+
     sendDirectMessage(){
       console.log('Send Messages');
 
@@ -96,11 +102,14 @@ export default {
     },
 
     submitForm(){
-      console.log('submit form', this.body)
-
+      let formData = new FormData()
+      formData.append('image', this.$refs.file.files[0])
+      formData.append('body', this.body)
       axios
-        .post('/api/posts/create/', {
-          'body':this.body
+        .post('/api/posts/create/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         })
         .then(response => {
           console.log('data', response.data)
@@ -108,6 +117,8 @@ export default {
           this.posts.unshift(response.data)
 
           this.body = ''
+          this.$refs.file.value = ''
+          this.url = null
 
           this.user.posts_count += 1
         })
@@ -163,10 +174,18 @@ export default {
         <form @submit.prevent="submitForm" method="POST">
           <div class="p-4">
             <textarea class="p-4 w-full bg-gray-100 rounded-lg" v-model="body" placeholder="What are you thinking about"></textarea>
+
+            <div id="previw" v-if="url">
+              <img :src="url" class="w-[100px] mt-3 rounded-xl">
+            </div>
           </div>
 
           <div class="p-4 border-t border-gray-100 flex justify-between">
-            <a href="" class="inline-block py-4 px-6 bg-gray-600 text-white rounded-lg">Attach Image</a>
+            
+            <label class="inline-block py-4 px-6 bg-gray-600 text-white rounded-lg">
+              <input type="file" ref="file" @change="onFileChange">
+              Attach Image
+            </label>
             <button href="" class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg">Post</button>
           </div>
       </form>
@@ -189,3 +208,16 @@ export default {
     </div>
   </div>
 </template>
+
+<style>
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+</style>
