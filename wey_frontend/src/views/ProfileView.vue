@@ -36,6 +36,7 @@ export default {
       },
       body: '',
       url: null,
+      can_send_friendship_request: null,
     }
   },
 
@@ -76,9 +77,9 @@ export default {
       axios
         .post(`/api/friends/${this.$route.params.id}/request/`)
         .then(response => {
-          console.log('data', response.data)
           if(response.data.message === 'request already sent'){
-            toast.info('The request has already been sente')
+            toast.info('The request has already been sent')
+            this.can_send_friendship_request = false
           } else {
             toast.info('The request was sent')
           }
@@ -91,10 +92,10 @@ export default {
       axios
         .get(`/api/posts/profile/${this.$route.params.id}`)
         .then(response => {
-          console.log('data', response.data)
 
           this.posts = response.data.posts
           this.user = response.data.user
+          this.can_send_friendship_request = response.data.can_send_friendship_request
         })
         .catch(error => {
           console.log('error', error)
@@ -112,8 +113,6 @@ export default {
           }
         })
         .then(response => {
-          console.log('data', response.data)
-
           this.posts.unshift(response.data)
 
           this.body = ''
@@ -154,7 +153,7 @@ export default {
         </div>
 
         <div class="mt-6" >
-          <button v-if="userStore.user.id !== user.id" class="inline-block py-4 px-3 bg-purple-600 text-xs text-white rounded-lg" @click="sendFriendshipRequest">Send friendship request</button>
+          <button v-if="userStore.user.id !== user.id && can_send_friendship_request" class="inline-block py-4 px-3 bg-purple-600 text-xs text-white rounded-lg" @click="sendFriendshipRequest">Send friendship request</button>
 
           <button v-if="userStore.user.id !== user.id" class="inline-block mt-4 py-4 px-3 bg-purple-600 text-xs text-white rounded-lg" @click="sendDirectMessage">Send Message</button>
 
