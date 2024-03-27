@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/posts/',include('post.urls')),
     path('api/search/', include('search.urls')),
     path('api/chat/', include('chat.urls')),
+    path('api/notifications/', include('notifications.urls')),
     path('activateemail/', activateemail, name='activateemail'),
     path('admin/', admin.site.urls),
     
