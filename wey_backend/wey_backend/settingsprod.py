@@ -14,8 +14,8 @@ SECRET_KEY = 'django-insecure--!r8cn)x$m6hx969iesudb3^8+8yp)wn#5o)t(3q$6gcb=$jvb
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-WEBSITE_URL =  "http://127.0.0.1:8000",
+ALLOWED_HOSTS = ['api.wey.com']
+WEBSITE_URL = "http://API.wey.com"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
@@ -38,11 +38,11 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://wey.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173"
+    "http://wey.com"
 ]
 
 INSTALLED_APPS = [

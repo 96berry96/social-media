@@ -7,6 +7,7 @@ import PeopleYouMayKnow from '@/components/PeopleYouMayKnow.vue';
 import Trends from '@/components/Trends.vue';
 import FeedItem from '@/components/FeedItem.vue';
 import { RouterLink } from 'vue-router';
+import FeedForm from '@/components/FeedForm.vue';
 
 export default {
   // 8a0f7d5f-a920-459a-ac9a-95fb3170c8c0
@@ -25,7 +26,8 @@ export default {
     PeopleYouMayKnow,
     Trends,
     FeedItem,
-    RouterLink
+    RouterLink,
+    FeedForm
 },
 
   data(){
@@ -35,6 +37,7 @@ export default {
         id: null
       },
       body: '',
+      is_private: false,
       url: null,
       can_send_friendship_request: null,
     }
@@ -106,6 +109,7 @@ export default {
       let formData = new FormData()
       formData.append('image', this.$refs.file.files[0])
       formData.append('body', this.body)
+      formData.append('is_private', this.is_private)
       axios
         .post('/api/posts/create/', formData, {
           headers: {
@@ -116,6 +120,7 @@ export default {
           this.posts.unshift(response.data)
 
           this.body = ''
+          this.is_private = false
           this.$refs.file.value = ''
           this.url = null
 
@@ -130,6 +135,10 @@ export default {
       this.userStore.removeToken()
 
       this.$router.push('/login')
+    },
+
+    deletePost(id){
+      this.posts = this.posts.filter(post => post.id !== id)
     }
 
   }
@@ -170,24 +179,13 @@ export default {
         class=" bg-white border border-gray-200 rounded-lg"
         v-if="userStore.user.id === user.id"
       >
-        <form @submit.prevent="submitForm" method="POST">
-          <div class="p-4">
-            <textarea class="p-4 w-full bg-gray-100 rounded-lg" v-model="body" placeholder="What are you thinking about"></textarea>
 
-            <div id="previw" v-if="url">
-              <img :src="url" class="w-[100px] mt-3 rounded-xl">
-            </div>
-          </div>
+        <FeedForm 
+          v-bind:user="user"
+          v-bind:posts="posts"
+        />
 
-          <div class="p-4 border-t border-gray-100 flex justify-between">
-            
-            <label class="inline-block py-4 px-6 bg-gray-600 text-white rounded-lg">
-              <input type="file" ref="file" @change="onFileChange">
-              Attach Image
-            </label>
-            <button href="" class="inline-block py-4 px-6 bg-purple-600 text-white rounded-lg">Post</button>
-          </div>
-      </form>
+        
       </div>
 
       <div 
@@ -195,7 +193,7 @@ export default {
         v-for="post in posts"
         v-bind:key="post.id"
       >
-        <FeedItem v-bind:post="post" />
+        <FeedItem v-bind:post="post" v-on:deletePost="deletePost"/>
       </div>
     </div> 
 
